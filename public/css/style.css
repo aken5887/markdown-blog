@@ -496,17 +496,18 @@ a {
 }
 
 .post-detail-meta {
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: flex-start;
-  gap: 14px;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
-.post-top {
+.post-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  min-height: 36px;
 }
 
 .post-actions {
@@ -520,10 +521,14 @@ a {
   display: none;
 }
 
-.post-detail h1 {
+.post-heading h1 {
   font-size: 1.9rem;
   letter-spacing: -0.02em;
   margin: 14px 0 8px;
+}
+
+.post-detail-category {
+  display: inline-flex;
 }
 
 .markdown-body {
