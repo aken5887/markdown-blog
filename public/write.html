@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+  (function () {
+    if (localStorage.getItem('devlog-theme') === 'dark') {
+      document.documentElement.dataset.theme = 'dark';
+    }
+  })();
+</script>
+<title>글쓰기 · DevLog</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="brand">DevLog</a>
+  <button id="save-btn" class="btn-primary" type="button">저장</button>
+</header>
+
+<main class="write-form">
+  <h1 class="write-heading" id="write-heading">새 글 작성</h1>
+
+  <input type="text" id="title-input" placeholder="제목을 입력하세요" />
+
+  <div class="write-meta">
+    <select id="category-select">
+      <option value="" disabled selected>카테고리 선택</option>
+    </select>
+    <input type="text" id="tags-input" placeholder="태그 (쉼표 구분) 예: javascript, react" />
+  </div>
+
+  <div class="editor-toolbar">
+    <button id="image-upload-btn" class="icon-btn" type="button" title="이미지 삽입">🖼 이미지 삽입</button>
+    <input type="file" id="image-input" accept="image/*" hidden />
+  </div>
+
+  <div class="editor-split">
+    <div class="editor-pane">
+      <div class="pane-label">MARKDOWN</div>
+      <textarea id="content-input" spellcheck="false" placeholder="마크다운으로 작성하세요...
+
+# 제목
+**굵게**, *기울임*, `코드`
+
+```javascript
+console.log('Hello!');
+```"></textarea>
+    </div>
+    <div class="editor-pane">
+      <div class="pane-label">미리보기</div>
+      <div id="preview-pane" class="markdown-body"></div>
+    </div>
+  </div>
+
+  <label class="md-dropzone" id="md-dropzone">
+    <span class="dropzone-icon">📄</span>
+    <span>MD 파일을 드래그 앤 드롭하거나</span>
+    <span class="btn-primary dropzone-btn">파일 선택</span>
+    <input type="file" id="md-file-input" accept=".md" hidden />
+  </label>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/write.js"></script>
+</body>
+</html>

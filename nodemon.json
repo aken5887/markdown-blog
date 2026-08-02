@@ -1,0 +1,5 @@
+{
+  "watch": ["server.js", "auth.js", "dataSync.js", "public"],
+  "ext": "js,json,html,css",
+  "ignore": ["node_modules", "posts", "data-repo", "public/images"]
+}

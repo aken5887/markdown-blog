@@ -1,0 +1,26 @@
+# Render Blueprint — connects this repo to a free Web Service with auto-deploy.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After the first deploy, every push to the tracked branch redeploys automatically.
+
+services:
+  - type: web
+    name: local-blog
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    autoDeployTrigger: commit
+    healthCheckPath: /api/config
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Optional override: set to "true" if you want write UI on the hosted site.
+      - key: ALLOW_WRITES
+        value: "false"
+      # Separate GitHub data repo for posts/images (survives Render disk resets).
+      - key: DATA_REPO_URL
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
