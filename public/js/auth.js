@@ -22,6 +22,11 @@
     sessionStorage.setItem(EXPIRY_KEY, String(Date.now() + 29 * 60 * 1000));
   }
 
+  function clearStoredToken() {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(EXPIRY_KEY);
+  }
+
   function field(placeholder) {
     const input = document.createElement('input');
     input.type = 'password';
@@ -171,4 +176,5 @@
 
   window.ensureAuth = ensureAuth;
   window.authHeaders = authHeaders;
+  window.clearAuthToken = clearStoredToken;
 })();

@@ -53,7 +53,7 @@ async function loadExisting() {
 
 // ---- Live preview (input + preview shown side by side, always in sync) ----
 function renderPreview() {
-  previewPane.innerHTML = marked.parse(contentInput.value || '_내용이 없습니다._');
+  previewPane.innerHTML = renderMarkdown(contentInput.value || '_내용이 없습니다._');
   previewPane.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
 }
 contentInput.addEventListener('input', renderPreview);

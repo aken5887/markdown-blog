@@ -40,9 +40,10 @@ function metaPath() {
   return path.join(POSTS_DIR, 'meta.json');
 }
 
-function readMeta() {
+function readStoredMeta() {
   try {
-    return JSON.parse(fs.readFileSync(metaPath(), 'utf8'));
+    const meta = JSON.parse(fs.readFileSync(metaPath(), 'utf8'));
+    return Array.isArray(meta) ? meta : [];
   } catch {
     return [];
   }
@@ -55,6 +56,56 @@ function writeMeta(meta) {
 function nextId(meta) {
   if (meta.length === 0) return 1;
   return Math.max(...meta.map((m) => m.id)) + 1;
+}
+
+// Keep the metadata index in sync with Markdown files copied into category
+// folders manually. Existing IDs are preserved; newly discovered files receive
+// the next available ID, and metadata for removed files is discarded.
+function readMeta() {
+  const storedMeta = readStoredMeta();
+  const meta = [];
+  const knownFiles = new Set();
+  let changed = false;
+
+  for (const entry of storedMeta) {
+    const key = `${entry.category}/${entry.filename}`;
+    const filePath = path.join(POSTS_DIR, entry.category || '', entry.filename || '');
+    if (
+      !isValidCategory(entry.category) ||
+      !isSafeFilename(entry.filename) ||
+      knownFiles.has(key) ||
+      !fs.existsSync(filePath)
+    ) {
+      changed = true;
+      continue;
+    }
+    knownFiles.add(key);
+    meta.push(entry);
+  }
+
+  let id = nextId(meta);
+  for (const category of CATEGORIES) {
+    const categoryDir = path.join(POSTS_DIR, category);
+    if (!fs.existsSync(categoryDir)) continue;
+
+    const filenames = fs
+      .readdirSync(categoryDir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && isSafeFilename(entry.name))
+      .map((entry) => entry.name)
+      .sort((a, b) => a.localeCompare(b, 'ko'));
+
+    for (const filename of filenames) {
+      const key = `${category}/${filename}`;
+      if (knownFiles.has(key)) continue;
+      meta.push({ id, category, filename });
+      knownFiles.add(key);
+      id += 1;
+      changed = true;
+    }
+  }
+
+  if (changed) writeMeta(meta);
+  return meta;
 }
 
 function slugify(title) {
@@ -281,9 +332,12 @@ async function start() {
     fs.writeFileSync(path.join(categoryDir, filename), fileBody, 'utf8');
 
     const meta = readMeta();
-    const id = nextId(meta);
-    meta.push({ id, category, filename });
-    writeMeta(meta);
+    const indexedPost = meta.find((entry) => entry.category === category && entry.filename === filename);
+    const id = indexedPost ? indexedPost.id : nextId(meta);
+    if (!indexedPost) {
+      meta.push({ id, category, filename });
+      writeMeta(meta);
+    }
 
     await pushChanges(`post: create ${category}/${filename}`);
     res.json({ id, category, filename });
@@ -378,9 +432,12 @@ async function start() {
     fs.writeFileSync(path.join(categoryDir, filename), fileBody, 'utf8');
 
     const meta = readMeta();
-    const id = nextId(meta);
-    meta.push({ id, category, filename });
-    writeMeta(meta);
+    const indexedPost = meta.find((entry) => entry.category === category && entry.filename === filename);
+    const id = indexedPost ? indexedPost.id : nextId(meta);
+    if (!indexedPost) {
+      meta.push({ id, category, filename });
+      writeMeta(meta);
+    }
 
     await pushChanges(`post: import ${category}/${filename}`);
     res.json({ id, category, filename });

@@ -40,7 +40,7 @@ async function loadPost() {
     chip.textContent = t;
     tagsEl.appendChild(chip);
   });
-  document.getElementById('post-content').innerHTML = marked.parse(post.content || '');
+  document.getElementById('post-content').innerHTML = renderMarkdown(post.content || '');
   hljs.highlightAll();
 
   const cfg = await getAppConfig();
@@ -62,14 +62,25 @@ async function loadPost() {
     if (!confirm('정말 삭제할까요? 되돌릴 수 없어요.')) return;
     try {
       await ensureAuth();
+      const deletePost = () =>
+        fetch(`/api/posts/${encodeURIComponent(post.category)}/${encodeURIComponent(post.filename)}`, {
+          method: 'DELETE',
+          headers: { ...authHeaders() },
+        });
+
+      let res = await deletePost();
+      // Sessions are server-memory only, so a server restart invalidates the
+      // browser's still-unexpired token. Ask once more and retry the request.
+      if (res.status === 401) {
+        clearAuthToken();
+        await ensureAuth();
+        res = await deletePost();
+      }
+      if (!res.ok) throw new Error('delete failed');
+      location.href = '/';
     } catch {
-      return;
+      alert('삭제에 실패했어요. 비밀번호를 다시 확인한 뒤 시도해주세요.');
     }
-    await fetch(`/api/posts/${encodeURIComponent(post.category)}/${encodeURIComponent(post.filename)}`, {
-      method: 'DELETE',
-      headers: { ...authHeaders() },
-    });
-    location.href = '/';
   });
   actions.appendChild(delBtn);
 }
