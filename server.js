@@ -358,7 +358,7 @@ async function start() {
 
   app.listen(PORT, () => {
     console.log(
-      `local-blog running on http://localhost:${PORT} (git sync: ${syncEnabled ? 'ON' : 'off'}, writable: ${isWritable() ? 'yes' : 'no'})`
+      `markdown-blog running on http://localhost:${PORT} (git sync: ${syncEnabled ? 'ON' : 'off'}, writable: ${isWritable() ? 'yes' : 'no'})`
     );
   });
 }

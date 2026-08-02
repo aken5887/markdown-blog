@@ -1,4 +1,4 @@
-# local-blog
+# markdown-blog
 
 로컬에서도, 웹에서도 쓰는 개인 개발 블로그. velog 스타일 디자인, MD 파일 기반 아티클 관리.
 
@@ -33,25 +33,25 @@ Render 무료 웹서비스는 도메인(`*.onrender.com`)을 자동으로 주고
 
 ### 1. 데이터 저장소 만들기
 
-GitHub에서 새 **빈 저장소**를 하나 만듭니다 (예: `local-blog-data`).
+GitHub에서 새 **빈 저장소**를 하나 만듭니다 (예: `markdown-blog-data`).
 **"Add a README file" 체크박스를 꼭 켜세요** — 커밋이 하나도 없는 저장소는 clone이 안 됩니다.
 
 ### 2. GitHub 토큰 발급
 
 https://github.com/settings/personal-access-tokens/new 에서 fine-grained 토큰을 만듭니다.
 
-- Repository access: 방금 만든 `local-blog-data` 저장소만 선택
+- Repository access: 방금 만든 `markdown-blog-data` 저장소만 선택
 - Permissions: **Contents → Read and write**
 
 ### 3. 이 프로젝트를 코드 저장소로 GitHub에 push
 
-`local-blog-data`와는 **별개의** 저장소입니다 (코드용 vs 데이터용).
+`markdown-blog-data`와는 **별개의** 저장소입니다 (코드용 vs 데이터용).
 
 ```bash
 git init
 git add .
 git commit -m "initial commit"
-git remote add origin https://github.com/yourname/local-blog.git
+git remote add origin https://github.com/yourname/markdown-blog.git
 git push -u origin main
 ```
 
@@ -74,7 +74,7 @@ git push -u origin main
 4. Environment:
    - `NODE_ENV` = `production`
    - `ALLOW_WRITES` = `false`
-   - `DATA_REPO_URL` = `https://github.com/yourname/local-blog-data.git`
+   - `DATA_REPO_URL` = `https://github.com/yourname/markdown-blog-data.git`
    - `GITHUB_TOKEN` = 2단계 토큰
 
 **방법 C — GitHub Actions Deploy Hook (선택)**
@@ -115,7 +115,7 @@ git push -u origin main
 ## 디렉터리 구조
 
 ```
-local-blog/
+markdown-blog/
 ├── server.js            # Express 서버 (모든 API)
 ├── auth.js               # 비밀번호 · 세션 토큰
 ├── dataSync.js           # GitHub 기반 영속화 (없으면 로컬 모드로 자동 폴백)
@@ -186,13 +186,13 @@ local-blog/
   - 비밀번호 해시는 `posts/auth.json`에 저장되고, 다른 데이터처럼 데이터 저장소에 커밋됨
   - 인증은 세션 토큰(30분) 방식이라 서버 재시작 시 다시 입력해야 함 — 개인 블로그 용도로는 충분한 수준
 
-> **보안 참고**: `local-blog-data` 저장소를 **Private**로 만드세요. 비밀번호는 해시로 저장되지만,
+> **보안 참고**: `markdown-blog-data` 저장소를 **Private**로 만드세요. 비밀번호는 해시로 저장되지만,
 > 저장소가 Public이면 해시가 그대로 노출되어 오프라인 대입 공격에 쓰일 수 있습니다.
 
 ## 알려진 제한사항
 
 - 기존에 로컬에만 있던 글/이미지는 자동으로 옮겨지지 않습니다. 배포 전에 `posts/`, `public/images/`
-  안의 파일을 데이터 저장소(`local-blog-data`)에 직접 복사해 커밋해두면 이어서 쓸 수 있습니다.
+  안의 파일을 데이터 저장소(`markdown-blog-data`)에 직접 복사해 커밋해두면 이어서 쓸 수 있습니다.
 - 이미지가 git 저장소에 그대로 쌓이는 구조라, 이미지가 아주 많아지면 저장소 용량이 커집니다.
   나중에 필요하면 이미지만 Cloudinary 같은 외부 스토리지로 옮기는 방향으로 확장 가능합니다.
 - 다크 모드, 비밀번호 보호 기능은 구현되었지만, TOC 자동생성 · 태그 페이지 · 정렬 옵션은 아직 미구현입니다.

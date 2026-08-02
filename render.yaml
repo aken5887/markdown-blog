@@ -5,7 +5,7 @@
 
 services:
   - type: web
-    name: local-blog
+    name: markdown-blog
     runtime: node
     plan: free
     region: oregon

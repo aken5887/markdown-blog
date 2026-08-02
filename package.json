@@ -1,7 +1,7 @@
 {
-  "name": "local-blog",
+  "name": "markdown-blog",
   "version": "1.1.0",
-  "description": "Local dev blog powered by Node.js + Vanilla JS, with optional GitHub-backed persistence for cloud hosting",
+  "description": "Markdown blog powered by Node.js + Vanilla JS, with optional GitHub-backed persistence for cloud hosting",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

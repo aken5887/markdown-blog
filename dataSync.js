@@ -69,8 +69,8 @@ async function init() {
   }
 
   git = simpleGit(DATA_DIR);
-  await git.addConfig('user.email', 'bot@local-blog.local');
-  await git.addConfig('user.name', 'local-blog-bot');
+  await git.addConfig('user.email', 'bot@markdown-blog.local');
+  await git.addConfig('user.name', 'markdown-blog-bot');
   syncEnabled = true;
 
   return {

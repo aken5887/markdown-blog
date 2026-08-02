@@ -8,7 +8,7 @@ async function loadPost() {
   }
   const post = await res.json();
 
-  document.title = `${post.title} · local-blog`;
+  document.title = `${post.title} · markdown-blog`;
 
   const categoryEl = document.getElementById('post-category');
   categoryEl.textContent = post.category;
