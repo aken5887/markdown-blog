@@ -128,7 +128,8 @@ markdown-blog/
 ├── posts/
 │   ├── meta.json         # 포스트 ID 매핑 [{id, category, filename}]
 │   ├── 개발/
-│   └── 업무/
+│   ├── 삽질/
+│   └── 공부/
 └── public/
     ├── favicon.svg
     ├── index.html        # 홈 (카드 목록)
@@ -145,7 +146,7 @@ markdown-blog/
 
 ## 카테고리
 
-`server.js` 상단에 하드코딩 (`CATEGORIES = ['개발', '업무']`). 추가하려면 이 배열만 수정하면
+`server.js` 상단에 하드코딩 (`CATEGORIES = ['개발', '삽질', '공부']`). 추가하려면 이 배열만 수정하면
 `write.html`의 select도 자동으로 반영됩니다 (서버에서 내려주는 `/api/categories`를 씀).
 
 ## API 엔드포인트

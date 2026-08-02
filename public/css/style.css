@@ -402,8 +402,12 @@ a {
   color: var(--accent);
 }
 
-.category-badge[data-category='업무'] {
+.category-badge[data-category='삽질'] {
   color: var(--amber);
+}
+
+.category-badge[data-category='공부'] {
+  color: #2563eb;
 }
 
 .card-title {

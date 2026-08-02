@@ -6,7 +6,7 @@ const matter = require('gray-matter');
 const dataSync = require('./dataSync');
 const auth = require('./auth');
 
-const CATEGORIES = ['개발', '업무'];
+const CATEGORIES = ['개발', '삽질', '공부'];
 const PORT = process.env.PORT || 3000;
 
 // Production (e.g. Render) is read-only in the UI and API by default.
