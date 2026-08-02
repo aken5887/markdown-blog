@@ -24,13 +24,13 @@ async function loadPost() {
   const createdTime = document.createElement('time');
   createdTime.className = 'card-date';
   createdTime.dateTime = created;
-  createdTime.textContent = `등록 ${created}`;
+  createdTime.textContent = `등록일 ${created}`;
   datesEl.appendChild(createdTime);
 
   const updatedTime = document.createElement('time');
   updatedTime.className = 'card-date';
   updatedTime.dateTime = updated;
-  updatedTime.textContent = `수정 ${updated}`;
+  updatedTime.textContent = `수정일 ${updated}`;
   datesEl.appendChild(updatedTime);
 
   const tagsEl = document.getElementById('post-tags');

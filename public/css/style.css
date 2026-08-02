@@ -473,9 +473,11 @@ a {
 
 .post-dates {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .empty-state {
