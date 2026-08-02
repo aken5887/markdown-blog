@@ -104,15 +104,50 @@ function isSafeFilename(filename) {
   );
 }
 
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function normalizeDate(value) {
+  if (!value) return null;
+  const s = String(value).trim();
+  // gray-matter may parse YAML dates into Date objects
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : s.slice(0, 10);
+}
+
+function resolveDates(data, stat) {
+  const fallback = stat ? stat.mtime.toISOString().slice(0, 10) : today();
+  const created =
+    normalizeDate(data.created) ||
+    normalizeDate(data.date) ||
+    fallback;
+  const updated =
+    normalizeDate(data.updated) ||
+    created;
+  return { created, updated };
+}
+
+function sortByIdDesc(entries) {
+  return entries.sort((a, b) => Number(b.id) - Number(a.id));
+}
+
 function loadPost(category, filename) {
   const filePath = path.join(POSTS_DIR, category, filename);
   if (!fs.existsSync(filePath)) return null;
   const raw = fs.readFileSync(filePath, 'utf8');
   const { data, content } = matter(raw);
   const stat = fs.statSync(filePath);
+  const { created, updated } = resolveDates(data, stat);
   return {
     title: data.title || filename.replace(/\.md$/i, ''),
-    date: data.date ? String(data.date) : stat.mtime.toISOString().slice(0, 10),
+    created,
+    updated,
+    // backward-compatible alias used by older clients
+    date: created,
     tags: Array.isArray(data.tags) ? data.tags : [],
     content,
   };
@@ -126,7 +161,9 @@ function buildListItem(entry) {
     category: entry.category,
     filename: entry.filename,
     title: post.title,
-    date: post.date,
+    created: post.created,
+    updated: post.updated,
+    date: post.created,
     tags: post.tags,
     excerpt: toPlainText(post.content).slice(0, 160),
   };
@@ -174,7 +211,7 @@ async function start() {
     const { category } = req.query;
     let meta = readMeta();
     if (category) meta = meta.filter((m) => m.category === category);
-    meta.sort((a, b) => b.id - a.id);
+    sortByIdDesc(meta);
     res.json(meta.map(buildListItem).filter(Boolean));
   });
 
@@ -193,13 +230,15 @@ async function start() {
           category: entry.category,
           filename: entry.filename,
           title: post.title,
-          date: post.date,
+          created: post.created,
+          updated: post.updated,
+          date: post.created,
           tags: post.tags,
           excerpt: toPlainText(post.content).slice(0, 160),
         });
       }
     }
-    results.sort((a, b) => b.id - a.id);
+    sortByIdDesc(results);
     res.json(results);
   });
 
@@ -233,11 +272,12 @@ async function start() {
     const categoryDir = path.join(POSTS_DIR, category);
     fs.mkdirSync(categoryDir, { recursive: true });
     const filename = uniqueFilename(categoryDir, slugify(title));
-    const date = new Date().toISOString().slice(0, 10);
+    const created = today();
+    const updated = created;
     const tagList = Array.isArray(tags)
       ? tags
       : String(tags || '').split(',').map((t) => t.trim()).filter(Boolean);
-    const fileBody = matter.stringify(content || '', { title, date, tags: tagList });
+    const fileBody = matter.stringify(content || '', { title, created, updated, tags: tagList });
     fs.writeFileSync(path.join(categoryDir, filename), fileBody, 'utf8');
 
     const meta = readMeta();
@@ -273,7 +313,8 @@ async function start() {
     const finalContent = content !== undefined ? content : existing.content;
     const fileBody = matter.stringify(finalContent, {
       title: finalTitle,
-      date: existing.date,
+      created: existing.created,
+      updated: today(),
       tags: finalTags,
     });
 
@@ -322,9 +363,18 @@ async function start() {
     fs.mkdirSync(categoryDir, { recursive: true });
     const base = originalName.replace(/\.md$/i, '');
     const filename = uniqueFilename(categoryDir, slugify(data.title || base));
-    const date = data.date ? String(data.date) : new Date().toISOString().slice(0, 10);
+    const created =
+      normalizeDate(data.created) ||
+      normalizeDate(data.date) ||
+      today();
+    const updated = normalizeDate(data.updated) || created;
     const tags = Array.isArray(data.tags) ? data.tags : [];
-    const fileBody = matter.stringify(content, { title: data.title || base, date, tags });
+    const fileBody = matter.stringify(content, {
+      title: data.title || base,
+      created,
+      updated,
+      tags,
+    });
     fs.writeFileSync(path.join(categoryDir, filename), fileBody, 'utf8');
 
     const meta = readMeta();

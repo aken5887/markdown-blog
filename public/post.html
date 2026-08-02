@@ -19,14 +19,16 @@
 <body>
 <header class="site-header">
   <a href="/" class="brand">DevLog</a>
-  <div class="header-actions" id="post-actions"></div>
 </header>
 
 <main class="post-detail">
-  <span class="category-badge" id="post-category"></span>
+  <div class="post-top">
+    <span class="category-badge" id="post-category"></span>
+    <div class="post-actions" id="post-actions" hidden></div>
+  </div>
   <h1 id="post-title"></h1>
   <div class="card-meta post-detail-meta">
-    <time id="post-date"></time>
+    <div class="post-dates" id="post-dates"></div>
     <div class="card-tags" id="post-tags"></div>
   </div>
   <article id="post-content" class="markdown-body"></article>

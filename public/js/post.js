@@ -15,7 +15,24 @@ async function loadPost() {
   categoryEl.dataset.category = post.category;
 
   document.getElementById('post-title').textContent = post.title;
-  document.getElementById('post-date').textContent = post.date;
+
+  const created = post.created || post.date || '';
+  const updated = post.updated || created;
+  const datesEl = document.getElementById('post-dates');
+  datesEl.innerHTML = '';
+
+  const createdTime = document.createElement('time');
+  createdTime.className = 'card-date';
+  createdTime.dateTime = created;
+  createdTime.textContent = `등록 ${created}`;
+  datesEl.appendChild(createdTime);
+
+  const updatedTime = document.createElement('time');
+  updatedTime.className = 'card-date';
+  updatedTime.dateTime = updated;
+  updatedTime.textContent = `수정 ${updated}`;
+  datesEl.appendChild(updatedTime);
+
   const tagsEl = document.getElementById('post-tags');
   (post.tags || []).forEach((t) => {
     const chip = document.createElement('span');
@@ -30,6 +47,7 @@ async function loadPost() {
   if (!cfg.writable) return;
 
   const actions = document.getElementById('post-actions');
+  actions.hidden = false;
 
   const editBtn = document.createElement('a');
   editBtn.className = 'btn-ghost';
@@ -42,9 +60,8 @@ async function loadPost() {
   delBtn.textContent = '삭제';
   delBtn.addEventListener('click', async () => {
     if (!confirm('정말 삭제할까요? 되돌릴 수 없어요.')) return;
-    let token;
     try {
-      token = await ensureAuth();
+      await ensureAuth();
     } catch {
       return;
     }

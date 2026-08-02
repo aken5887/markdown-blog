@@ -37,6 +37,13 @@ async function loadPosts() {
   renderPosts(await res.json());
 }
 
+function formatDates(created, updated) {
+  const c = created || '';
+  const u = updated || created || '';
+  if (u && u !== c) return { created: c, updated: u, same: false };
+  return { created: c, updated: c, same: true };
+}
+
 function renderPosts(posts) {
   grid.innerHTML = '';
   if (posts.length === 0) {
@@ -52,7 +59,16 @@ function renderPosts(posts) {
     badge.dataset.category = post.category;
     card.querySelector('.card-title').textContent = post.title;
     card.querySelector('.card-excerpt').textContent = post.excerpt;
-    card.querySelector('.card-date').textContent = post.date;
+    const dates = formatDates(post.created || post.date, post.updated);
+    const createdEl = card.querySelector('.card-created');
+    const updatedEl = card.querySelector('.card-updated');
+    createdEl.textContent = dates.created;
+    createdEl.dateTime = dates.created;
+    if (!dates.same) {
+      updatedEl.hidden = false;
+      updatedEl.textContent = `수정 ${dates.updated}`;
+      updatedEl.dateTime = dates.updated;
+    }
     const tagsEl = card.querySelector('.card-tags');
     (post.tags || []).forEach((t) => {
       const chip = document.createElement('span');
@@ -134,7 +150,9 @@ function renderSearchResults(posts) {
     item.href = `/posts/${post.id}`;
     item.innerHTML = `
       <div class="search-result-title">${post.title}</div>
-      <div class="search-result-meta">${post.category} · ${post.date}</div>`;
+      <div class="search-result-meta">${post.category} · ${post.created || post.date}${
+        post.updated && post.updated !== (post.created || post.date) ? ` · 수정 ${post.updated}` : ''
+      }</div>`;
     searchResults.appendChild(item);
   });
 }

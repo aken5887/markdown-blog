@@ -452,9 +452,30 @@ a {
   border-radius: 999px;
 }
 
+.card-dates {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', 'Pretendard', monospace;
+}
+
 .card-date {
   white-space: nowrap;
   font-family: 'JetBrains Mono', 'Pretendard', monospace;
+}
+
+.card-updated {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.post-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }
 
 .empty-state {
@@ -476,6 +497,25 @@ a {
   justify-content: flex-start;
   gap: 14px;
   margin-top: 4px;
+}
+
+.post-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.post-actions[hidden] {
+  display: none;
 }
 
 .post-detail h1 {
