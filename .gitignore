@@ -3,3 +3,4 @@ data-repo/
 .env
 .DS_Store
 posts/auth.json
+.obsidian/

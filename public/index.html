@@ -1,65 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script>
-  (function () {
-    if (localStorage.getItem('devlog-theme') === 'dark') {
-      document.documentElement.dataset.theme = 'dark';
-    }
-  })();
-</script>
-<title>DevLog</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet" />
-<link rel="stylesheet" href="/css/style.css" />
-</head>
-<body>
-<header class="site-header">
-  <a href="/" class="brand">DevLog</a>
-  <div class="header-actions">
-    <button id="search-toggle" class="icon-btn" type="button" aria-label="검색">🔍</button>
-    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="테마 변경">
-      <span class="theme-toggle-thumb"></span>
-    </button>
-    <a href="/write.html" class="btn-primary" id="write-btn" hidden>글쓰기</a>
-  </div>
-</header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        if (localStorage.getItem("devlog-theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
+    <title>DevLog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" class="brand">DevLog</a>
+      <div class="header-actions">
+        <button
+          id="search-toggle"
+          class="icon-btn"
+          type="button"
+          aria-label="검색"
+        >
+          🔍
+        </button>
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
+          type="button"
+          aria-label="테마 변경"
+        >
+          <span class="theme-toggle-thumb"></span>
+        </button>
+        <a href="/write.html" class="btn-primary" id="write-btn" hidden
+          >글쓰기</a
+        >
+      </div>
+    </header>
 
-<nav class="category-tabs" id="category-tabs">
-  <button class="tab active" data-category="">전체 글</button>
-</nav>
+    <nav class="category-tabs" id="category-tabs">
+      <button class="tab active" data-category="">전체 글</button>
+    </nav>
 
-<main class="post-grid" id="post-grid"></main>
+    <main class="post-grid" id="post-grid"></main>
 
-<template id="card-template">
-  <a class="post-card" href="#">
-    <span class="category-badge"></span>
-    <h2 class="card-title"></h2>
-    <p class="card-excerpt"></p>
-    <div class="card-meta">
-      <div class="card-tags"></div>
-      <div class="card-dates">
-        <time class="card-date card-created"></time>
-        <time class="card-date card-updated" hidden></time>
+    <template id="card-template">
+      <a class="post-card" href="#">
+        <span class="category-badge"></span>
+        <h2 class="card-title"></h2>
+        <p class="card-excerpt"></p>
+        <div class="card-meta">
+          <div class="card-tags"></div>
+          <div class="card-dates">
+            <time class="card-date card-created"></time>
+          </div>
+        </div>
+      </a>
+    </template>
+
+    <div class="search-overlay" id="search-overlay" hidden>
+      <div class="search-modal">
+        <div class="search-modal-header">
+          <span class="search-icon">🔍</span>
+          <input
+            type="search"
+            id="search-input"
+            placeholder="제목 또는 내용으로 검색..."
+            autocomplete="off"
+          />
+          <button
+            class="auth-close"
+            id="search-close"
+            type="button"
+            aria-label="닫기"
+          >
+            ×
+          </button>
+        </div>
+        <div class="search-results" id="search-results"></div>
       </div>
     </div>
-  </a>
-</template>
 
-<div class="search-overlay" id="search-overlay" hidden>
-  <div class="search-modal">
-    <div class="search-modal-header">
-      <span class="search-icon">🔍</span>
-      <input type="search" id="search-input" placeholder="제목 또는 내용으로 검색..." autocomplete="off" />
-      <button class="auth-close" id="search-close" type="button" aria-label="닫기">×</button>
-    </div>
-    <div class="search-results" id="search-results"></div>
-  </div>
-</div>
-
-<script src="/js/config.js"></script>
-<script src="/js/main.js"></script>
-</body>
+    <script src="/js/config.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
 </html>
