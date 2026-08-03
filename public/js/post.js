@@ -40,7 +40,7 @@ async function loadPost() {
     chip.textContent = t;
     tagsEl.appendChild(chip);
   });
-  document.getElementById('post-content').innerHTML = renderMarkdown(post.content || '');
+  document.getElementById('post-content').innerHTML = renderMarkdown(post.content || '', { category: post.category });
   hljs.highlightAll();
 
   const cfg = await getAppConfig();

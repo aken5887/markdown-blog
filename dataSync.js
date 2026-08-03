@@ -1,12 +1,12 @@
 /**
  * dataSync.js
  *
- * Local mode (default): posts/ and public/images/ are used as-is, exactly like
- * the original local-only version. Nothing changes for local `node server.js` use.
+ * Local mode (default): posts/ (including posts/images/) is used as-is.
  *
- * Cloud mode (when DATA_REPO_URL is set, e.g. on Render): posts/ and images/ are
- * cloned from a separate GitHub "data repo" on boot, and every write (create /
- * update / delete post, image upload) is committed and pushed back to that repo.
+ * Cloud mode (when DATA_REPO_URL is set, e.g. on Render): posts/ is cloned from
+ * a separate GitHub "data repo" on boot, and every write (create / update /
+ * delete post, image upload) is committed and pushed back to that repo.
+ * Images live under posts/images/ so they sync with the rest of the post data.
  * This is what survives Render's ephemeral filesystem across redeploys/restarts.
  */
 const fs = require('fs');
@@ -29,10 +29,11 @@ async function noopPush() {}
 
 async function init() {
   if (!DATA_REPO_URL) {
-    console.log('[dataSync] DATA_REPO_URL not set -> local storage mode (posts/, public/images/)');
+    const postsDir = path.join(__dirname, 'posts');
+    console.log('[dataSync] DATA_REPO_URL not set -> local storage mode (posts/, posts/images/)');
     return {
-      postsDir: path.join(__dirname, 'posts'),
-      imagesDir: path.join(__dirname, 'public', 'images'),
+      postsDir,
+      imagesDir: path.join(postsDir, 'images'),
       syncEnabled: false,
       commitAndPush: noopPush,
     };
@@ -40,7 +41,7 @@ async function init() {
 
   const remote = authedUrl(DATA_REPO_URL);
   const postsDir = path.join(DATA_DIR, 'posts');
-  const imagesDir = path.join(DATA_DIR, 'images');
+  const imagesDir = path.join(postsDir, 'images');
 
   try {
     if (!fs.existsSync(path.join(DATA_DIR, '.git'))) {
@@ -56,7 +57,7 @@ async function init() {
     console.error('[dataSync] falling back to local storage for this run.');
     return {
       postsDir: path.join(__dirname, 'posts'),
-      imagesDir: path.join(__dirname, 'public', 'images'),
+      imagesDir: path.join(__dirname, 'posts', 'images'),
       syncEnabled: false,
       commitAndPush: noopPush,
     };

@@ -1,13 +1,15 @@
 ---
 title: Markdown 블로그 구축 내역
 created: '2026-08-02'
-updated: '2026-08-02'
+updated: '2026-08-03'
 tags:
   - Node.js
   - Express
   - Markdown
   - Vanilla JS
 ---
+![](images/1785760613308-Pasted-image-20260802151323.png)
+
 개인적으로 쓸 개발 블로그를 Markdown 파일 기반으로 구성했다. 글을 데이터베이스에 넣는 대신 파일로 관리해서, 에디터나 Git으로 바로 열어볼 수 있게 한 것이 핵심이다.
 
 ## 구성

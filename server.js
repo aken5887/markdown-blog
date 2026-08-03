@@ -237,6 +237,8 @@ async function start() {
   const app = express();
   app.use(express.json({ limit: '5mb' }));
   app.use(express.static(path.join(__dirname, 'public')));
+  // Unified image storage: posts/images/ (served at both /posts/images and /images)
+  app.use('/posts/images', express.static(IMAGES_DIR));
   app.use('/images', express.static(IMAGES_DIR));
 
   // ---------------- API ----------------
@@ -449,11 +451,13 @@ async function start() {
     const ext = path.extname(originalName) || '.png';
     const safeBase = slugify(path.basename(originalName, ext));
     const savedName = `${Date.now()}-${safeBase}${ext}`;
+    // Unified storage: always posts/images/ (not per-category)
     fs.mkdirSync(IMAGES_DIR, { recursive: true });
     fs.writeFileSync(path.join(IMAGES_DIR, savedName), req.file.buffer);
 
-    await pushChanges(`image: upload ${savedName}`);
-    res.json({ path: `/images/${savedName}` });
+    await pushChanges(`image: upload images/${savedName}`);
+    // Relative path for Markdown; client rewrites to /posts/images/ when rendering.
+    res.json({ path: `images/${savedName}` });
   });
 
   // ---------------- Pages ----------------

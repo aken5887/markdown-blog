@@ -53,10 +53,13 @@ async function loadExisting() {
 
 // ---- Live preview (input + preview shown side by side, always in sync) ----
 function renderPreview() {
-  previewPane.innerHTML = renderMarkdown(contentInput.value || '_내용이 없습니다._');
+  previewPane.innerHTML = renderMarkdown(contentInput.value || '_내용이 없습니다._', {
+    category: categorySelect.value,
+  });
   previewPane.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
 }
 contentInput.addEventListener('input', renderPreview);
+categorySelect.addEventListener('change', renderPreview);
 renderPreview();
 
 // ---- Tab key inserts a literal tab character instead of moving focus ----
@@ -84,6 +87,7 @@ imageInput.addEventListener('change', async () => {
     if (!res.ok) throw new Error('upload failed');
     const data = await res.json();
     const start = contentInput.selectionStart;
+    // Use the unified /posts/images/ path returned by the server.
     const snippet = `![](${data.path})`;
     contentInput.value = `${contentInput.value.slice(0, start)}${snippet}${contentInput.value.slice(start)}`;
     contentInput.selectionStart = contentInput.selectionEnd = start + snippet.length;
