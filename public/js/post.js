@@ -1,5 +1,56 @@
 const id = location.pathname.split('/').filter(Boolean).pop();
 
+function enableImageZoom() {
+  const images = document.querySelectorAll('#post-content img');
+  if (images.length === 0) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'image-lightbox';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', '확대 이미지');
+  overlay.hidden = true;
+
+  const closeButton = document.createElement('button');
+  closeButton.className = 'image-lightbox-close';
+  closeButton.type = 'button';
+  closeButton.setAttribute('aria-label', '확대 이미지 닫기');
+  closeButton.textContent = '×';
+
+  const lightboxImage = document.createElement('img');
+  lightboxImage.className = 'image-lightbox-image';
+  overlay.append(closeButton, lightboxImage);
+  document.body.appendChild(overlay);
+
+  let previousFocus = null;
+  const close = () => {
+    overlay.hidden = true;
+    document.body.classList.remove('lightbox-open');
+    previousFocus?.focus();
+  };
+
+  images.forEach((image) => {
+    image.classList.add('zoomable-image');
+    image.addEventListener('click', (event) => {
+      event.preventDefault();
+      previousFocus = document.activeElement;
+      lightboxImage.src = image.currentSrc || image.src;
+      lightboxImage.alt = image.alt;
+      overlay.hidden = false;
+      document.body.classList.add('lightbox-open');
+      closeButton.focus();
+    });
+  });
+
+  closeButton.addEventListener('click', close);
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) close();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !overlay.hidden) close();
+  });
+}
+
 async function loadPost() {
   const res = await fetch(`/api/posts/by-id/${encodeURIComponent(id)}`);
   if (!res.ok) {
@@ -48,6 +99,7 @@ async function loadPost() {
   });
   document.getElementById('post-content').innerHTML = renderMarkdown(post.content || '', { category: post.category });
   hljs.highlightAll();
+  enableImageZoom();
 
   const cfg = await getAppConfig();
   if (!cfg.writable) return;

@@ -559,6 +559,53 @@ a {
   border-radius: var(--radius);
 }
 
+.markdown-body .zoomable-image {
+  cursor: zoom-in;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 82%);
+  cursor: zoom-out;
+}
+
+.image-lightbox[hidden] {
+  display: none;
+}
+
+.image-lightbox-image {
+  display: block;
+  max-width: min(1100px, 100%);
+  max-height: calc(100vh - 48px);
+  object-fit: contain;
+  border-radius: var(--radius);
+  cursor: default;
+}
+
+.image-lightbox-close {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 18%);
+  color: #fff;
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.lightbox-open {
+  overflow: hidden;
+}
+
 .markdown-body pre {
   border-radius: var(--radius);
   padding: 16px;

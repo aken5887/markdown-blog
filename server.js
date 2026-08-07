@@ -61,6 +61,44 @@ function nextId(meta) {
   return Math.max(...meta.map((m) => m.id)) + 1;
 }
 
+const IMAGE_EXTENSIONS = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.svg', '.webp']);
+
+function readMarkdownContents(directory) {
+  if (!fs.existsSync(directory)) return '';
+  return fs.readdirSync(directory, { withFileTypes: true }).reduce((contents, entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return contents + readMarkdownContents(entryPath);
+    if (!entry.isFile() || !entry.name.toLowerCase().endsWith('.md')) return contents;
+    try {
+      return `${contents}\n${fs.readFileSync(entryPath, 'utf8')}`;
+    } catch {
+      return contents;
+    }
+  }, '');
+}
+
+// Images are shared in posts/images. Keep a file when its literal or
+// URL-encoded filename appears in any Markdown file, including Obsidian links.
+function cleanupUnusedImages() {
+  if (!fs.existsSync(IMAGES_DIR)) return [];
+  const markdown = readMarkdownContents(POSTS_DIR);
+  const deleted = [];
+
+  for (const entry of fs.readdirSync(IMAGES_DIR, { withFileTypes: true })) {
+    if (!entry.isFile() || !IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
+    const encodedName = encodeURIComponent(entry.name);
+    if (markdown.includes(entry.name) || markdown.includes(encodedName)) continue;
+
+    fs.unlinkSync(path.join(IMAGES_DIR, entry.name));
+    deleted.push(entry.name);
+  }
+
+  if (deleted.length > 0) {
+    console.log(`[images] removed ${deleted.length} unused image(s)`);
+  }
+  return deleted;
+}
+
 // Keep the metadata index in sync with Markdown files copied into category
 // folders manually. Existing IDs are preserved; newly discovered files receive
 // the next available ID, and metadata for removed files is discarded.
@@ -248,6 +286,7 @@ async function start() {
   CATEGORIES.forEach((c) => fs.mkdirSync(path.join(POSTS_DIR, c), { recursive: true }));
   if (!fs.existsSync(metaPath())) writeMeta([]);
   auth.init(POSTS_DIR, pushChanges);
+  cleanupUnusedImages();
 
   const app = express();
   app.use(express.json({ limit: '5mb' }));

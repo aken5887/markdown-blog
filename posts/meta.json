@@ -28,5 +28,35 @@
     "id": 10,
     "category": "공부",
     "filename": "실적발표-전-트레이딩-전략.md"
+  },
+  {
+    "id": 11,
+    "category": "공부",
+    "filename": "국내시장-마켓브레스-확인법.md"
+  },
+  {
+    "id": 12,
+    "category": "공부",
+    "filename": "미국시장-마켓브레스-확인법.md"
+  },
+  {
+    "id": 13,
+    "category": "공부",
+    "filename": "상위-시간대와-하위-시간대로-차트-읽는-법.md"
+  },
+  {
+    "id": 14,
+    "category": "공부",
+    "filename": "주식-차트-분석-입문.md"
+  },
+  {
+    "id": 15,
+    "category": "공부",
+    "filename": "AI를-활용한-주식-공부법.md"
+  },
+  {
+    "id": 16,
+    "category": "공부",
+    "filename": "Winner는-왜-두-번-오르는가.md"
   }
 ]
