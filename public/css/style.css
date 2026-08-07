@@ -436,7 +436,6 @@ a {
 .card-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
   font-size: 0.78rem;
@@ -447,9 +446,19 @@ a {
 }
 
 .card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: block;
+  min-width: 0;
+}
+
+.card-tags::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.card-tags .tag-chip {
+  display: inline-block;
+  margin: 0 6px 6px 0;
 }
 
 .tag-chip {
@@ -461,17 +470,20 @@ a {
   border-radius: 999px;
 }
 
-.card-dates {
-  display: block;
-  align-items: flex-end;
-  gap: 2px;
-  white-space: nowrap;
-  font-family: 'JetBrains Mono', 'Pretendard', monospace;
+.card-meta-separator {
+  float: right;
+  color: var(--border);
+  font-size: 0.8rem;
+  margin: 2px 7px 0 0;
 }
 
 .card-date {
   white-space: nowrap;
   font-family: 'JetBrains Mono', 'Pretendard', monospace;
+}
+
+.card-tags .card-date {
+  float: right;
 }
 
 .card-updated {

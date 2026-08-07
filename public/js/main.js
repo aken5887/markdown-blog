@@ -71,6 +71,8 @@ function renderPosts(posts) {
       chip.textContent = t;
       tagsEl.appendChild(chip);
     });
+    // 태그가 없을 때는 날짜 앞 구분자를 표시하지 않는다.
+    card.querySelector(".card-meta-separator").hidden = !(post.tags || []).length;
     grid.appendChild(node);
   });
 }
