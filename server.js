@@ -29,7 +29,10 @@ let IMAGES_DIR;
 let syncEnabled = false;
 let pushChanges = async () => {};
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 // multer decodes multipart filenames as latin1 -> fix Korean (and other UTF-8) names
 function decodeFilename(name) {
@@ -127,15 +130,21 @@ function uniqueFilename(categoryDir, base) {
   return filename;
 }
 
-// Excerpt generator: strips code blocks/inline code, drops images, keeps link
-// text only, removes markdown markers, collapses whitespace.
+// Excerpt generator for the post cards. It keeps readable prose only: Markdown
+// syntax, embeds, URLs, and decorative special characters are removed before
+// the client receives the summary.
 function toPlainText(md) {
   return String(md || '')
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/`[^`]*`/g, ' ')
+    .replace(/!\[\[[^\]\n]+\]\]/g, ' ')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[#>*_~`-]/g, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/^\s{0,3}(?:#{1,6}|>|[-+*]|\d+[.)])\s*/gm, '')
+    .replace(/[*_~`|\\\[\]{}()<>#]/g, ' ')
+    .replace(/[!@^=+;:"',.?/]/g, ' ')
     .replace(/\n+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -200,7 +209,13 @@ function loadPost(category, filename) {
     // backward-compatible alias used by older clients
     date: created,
     tags: Array.isArray(data.tags) ? data.tags : [],
-    content,
+    // Encode spaces in image URLs so CommonMark parsers (marked.js) treat them
+    // as <img> elements rather than plain text.
+    // ![](images/Pasted image xxx.png) -> ![](images/Pasted%20image%20xxx.png)
+    content: content.replace(/(!\[[^\]]*\]\()([^)]+)(\))/g, (m, open, url, close) => {
+      if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) return m; // absolute URL: leave as-is
+      return open + url.replace(/ /g, '%20') + close;
+    }),
   };
 }
 
@@ -237,9 +252,12 @@ async function start() {
   const app = express();
   app.use(express.json({ limit: '5mb' }));
   app.use(express.static(path.join(__dirname, 'public')));
-  // Unified image storage: posts/images/ (served at both /posts/images and /images)
-  app.use('/posts/images', express.static(IMAGES_DIR));
   app.use('/images', express.static(IMAGES_DIR));
+  // Markdown files can reference category-local images (for example,
+  // ![](chart.png) in posts/공부/article.md resolves to posts/공부/images/chart.png).
+  app.use('/post-images', express.static(POSTS_DIR));
+  // Unified image URL used by markdown.js: /posts/images/:filename
+  app.use('/posts/images', express.static(IMAGES_DIR));
 
   // ---------------- API ----------------
 
@@ -445,18 +463,20 @@ async function start() {
     res.json({ id, category, filename });
   });
 
-  app.post('/api/images', requireWritable, upload.single('image'), async (req, res) => {
+  app.post('/api/images', requireWritable, auth.requireAuth, upload.single('image'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'image required' });
+    if (!req.file.mimetype || !req.file.mimetype.startsWith('image/')) {
+      return res.status(400).json({ error: 'image files only' });
+    }
     const originalName = decodeFilename(req.file.originalname);
-    const ext = path.extname(originalName) || '.png';
+    const ext = path.extname(originalName).toLowerCase() || '.png';
     const safeBase = slugify(path.basename(originalName, ext));
     const savedName = `${Date.now()}-${safeBase}${ext}`;
-    // Unified storage: always posts/images/ (not per-category)
+    // All images go into a single shared folder: posts/images/
     fs.mkdirSync(IMAGES_DIR, { recursive: true });
     fs.writeFileSync(path.join(IMAGES_DIR, savedName), req.file.buffer);
 
     await pushChanges(`image: upload images/${savedName}`);
-    // Relative path for Markdown; client rewrites to /posts/images/ when rendering.
     res.json({ path: `images/${savedName}` });
   });
 

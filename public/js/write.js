@@ -62,6 +62,23 @@ contentInput.addEventListener('input', renderPreview);
 categorySelect.addEventListener('change', renderPreview);
 renderPreview();
 
+// Keep the two fixed-height panes at the same relative reading position.
+// This remains useful when rendered images make the preview taller than source.
+let syncingScroll = false;
+function syncScroll(source, target) {
+  if (syncingScroll) return;
+  const sourceRange = source.scrollHeight - source.clientHeight;
+  const targetRange = target.scrollHeight - target.clientHeight;
+  if (sourceRange <= 0 || targetRange <= 0) return;
+
+  syncingScroll = true;
+  target.scrollTop = (source.scrollTop / sourceRange) * targetRange;
+  requestAnimationFrame(() => { syncingScroll = false; });
+}
+
+contentInput.addEventListener('scroll', () => syncScroll(contentInput, previewPane));
+previewPane.addEventListener('scroll', () => syncScroll(previewPane, contentInput));
+
 // ---- Tab key inserts a literal tab character instead of moving focus ----
 contentInput.addEventListener('keydown', (e) => {
   if (e.key !== 'Tab') return;
@@ -73,32 +90,58 @@ contentInput.addEventListener('keydown', (e) => {
   renderPreview();
 });
 
-// ---- Inline image insert ----
-imageBtn.addEventListener('click', () => imageInput.click());
+// ---- Inline image insert (file chooser and clipboard paste) ----
+function insertAtCursor(text) {
+  const start = contentInput.selectionStart;
+  const end = contentInput.selectionEnd;
+  contentInput.value = `${contentInput.value.slice(0, start)}${text}${contentInput.value.slice(end)}`;
+  contentInput.selectionStart = contentInput.selectionEnd = start + text.length;
+  contentInput.focus();
+  renderPreview();
+}
 
-imageInput.addEventListener('change', async () => {
-  const file = imageInput.files[0];
-  if (!file) return;
+async function uploadAndInsertImage(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  try {
+    await ensureAuth();
+  } catch {
+    return;
+  }
   const formData = new FormData();
   formData.append('image', file);
   imageBtn.disabled = true;
   try {
-    const res = await fetch('/api/images', { method: 'POST', body: formData });
+    const res = await fetch('/api/images', { method: 'POST', headers: { ...authHeaders() }, body: formData });
     if (!res.ok) throw new Error('upload failed');
     const data = await res.json();
-    const start = contentInput.selectionStart;
-    // Use the unified /posts/images/ path returned by the server.
-    const snippet = `![](${data.path})`;
-    contentInput.value = `${contentInput.value.slice(0, start)}${snippet}${contentInput.value.slice(start)}`;
-    contentInput.selectionStart = contentInput.selectionEnd = start + snippet.length;
-    contentInput.focus();
-    renderPreview();
+    // This relative path is also valid in Obsidian because both apps share posts/images.
+    insertAtCursor(`![](${data.path})`);
   } catch (err) {
     alert('이미지 업로드에 실패했어요.');
   } finally {
     imageBtn.disabled = false;
-    imageInput.value = '';
   }
+}
+
+imageBtn.addEventListener('click', () => imageInput.click());
+
+imageInput.addEventListener('change', async () => {
+  const file = imageInput.files[0];
+  await uploadAndInsertImage(file);
+  imageInput.value = '';
+});
+
+contentInput.addEventListener('paste', async (event) => {
+  const items = Array.from(event.clipboardData?.items || []);
+  const images = items
+    .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+    .map((item) => item.getAsFile())
+    .filter(Boolean);
+  if (images.length === 0) return;
+
+  // Do not insert an unusable data URL or text representation alongside the upload.
+  event.preventDefault();
+  for (const image of images) await uploadAndInsertImage(image);
 });
 
 // ---- MD file import (drag & drop, or "파일 선택") ----

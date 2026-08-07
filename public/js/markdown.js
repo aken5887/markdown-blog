@@ -5,15 +5,20 @@
 // Also normalizes Obsidian wiki-style image embeds and rewrites relative image
 // paths to the unified /posts/images/ directory.
 function renderMarkdown(markdown, { category } = {}) {
-  // Obsidian: ![[filename.png]] or ![[images/filename.png]] → standard MD image
+  // Obsidian: ![[filename.png]], ![[images/filename.png]], and
+  // ![[filename.png|400]] → standard Markdown image. The display-size suffix
+  // is intentionally ignored: responsive CSS controls image width on the blog.
   const normalized = String(markdown || '').replace(
     /!\[\[([^\]\n]+)\]\]/g,
     (_, target) => {
-      const src = String(target).trim();
+      const src = String(target).split('|', 1)[0].trim();
       if (!src) return '';
       // Only treat as image when it looks like one (has image extension or lives under images/)
       if (/\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(src) || /(^|\/)images\//i.test(src)) {
-        return `![](${src})`;
+        // Marked requires spaces in a Markdown URL to be percent-encoded.
+        let encoded = src;
+        try { encoded = encodeURI(decodeURI(src)); } catch { encoded = encodeURI(src); }
+        return `![](${encoded})`;
       }
       // Non-image wiki link: leave a plain text fallback
       return src;
@@ -77,6 +82,10 @@ function renderMarkdown(markdown, { category } = {}) {
       .replace(/^\.\//, '')
       .replace(/^\/?posts\/images\//i, '')
       .replace(/^\/?images\//i, '');
+
+    // The server and wiki-link normalization may already have encoded spaces.
+    // Decode before encoding the final URL so "%20" never becomes "%2520".
+    try { filename = decodeURIComponent(filename); } catch { /* keep malformed input unchanged */ }
 
     // Reject path traversal or nested paths after stripping
     if (!filename || filename.includes('/') || filename.includes('..') || filename.includes('\\')) {

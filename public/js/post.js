@@ -27,6 +27,12 @@ async function loadPost() {
   createdTime.textContent = `등록일 ${created}`;
   datesEl.appendChild(createdTime);
 
+  const separator = document.createElement('span');
+  separator.className = 'date-separator';
+  separator.setAttribute('aria-hidden', 'true');
+  separator.textContent = '·';
+  datesEl.appendChild(separator);
+
   const updatedTime = document.createElement('time');
   updatedTime.className = 'card-date';
   updatedTime.dateTime = updated;

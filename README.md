@@ -15,7 +15,7 @@ npm start
 ```
 
 `.env` 파일을 만들지 않으면(또는 비워두면) `DATA_REPO_URL` / `GITHUB_TOKEN`이 없는 상태로 실행되고,
-이 경우 원래 버전과 완전히 동일하게 `posts/`, `public/images/`를 이 컴퓨터에 직접 읽고 씁니다.
+이 경우 `posts/`를 이 컴퓨터에 직접 읽고 씁니다. 이미지는 항상 `posts/images/`에 저장됩니다.
 로컬(`NODE_ENV`가 `production`이 아닐 때)에서는 글쓰기 · 수정 · 삭제 · 비밀번호 UI가 그대로 보입니다.
 
 ---
@@ -127,6 +127,7 @@ markdown-blog/
 ├── .github/workflows/    # (선택) Deploy Hook 기반 Actions
 ├── posts/
 │   ├── meta.json         # 포스트 ID 매핑 [{id, category, filename}]
+│   ├── images/            # 블로그·Obsidian 공용 첨부 이미지
 │   ├── 개발/
 │   ├── 삽질/
 │   └── 공부/
@@ -162,14 +163,14 @@ markdown-blog/
 | PUT | `/api/posts/:category/:filename` | 수정 (`{content, newCategory}`) |
 | DELETE | `/api/posts/:category/:filename` | 삭제 |
 | POST | `/api/upload` | MD 파일 업로드 (multipart) |
-| POST | `/api/images` | 이미지 업로드 → `/images/파일명` 반환 |
+| POST | `/api/images` | 이미지 업로드 → `images/파일명` 반환 |
 | GET | `/api/search` | 전문 검색 (`?q=키워드`) |
 | GET | `/api/auth/status` | 비밀번호 설정 여부 확인 |
 | POST | `/api/auth/set-password` | 최초 비밀번호 설정 |
 | POST | `/api/auth/verify` | 비밀번호 확인 → 세션 토큰 발급 |
 | POST | `/api/auth/change-password` | 비밀번호 변경 |
 
-> **인증**: POST/PUT/DELETE `/api/posts*`와 `/api/upload`는 `x-auth-token` 헤더가 필요합니다.
+> **인증**: POST/PUT/DELETE `/api/posts*`, `/api/upload`, `/api/images`는 `x-auth-token` 헤더가 필요합니다.
 > `/api/auth/verify` 또는 `/api/auth/set-password`로 발급받은 토큰을 사용하세요 (유효시간 30분).
 >
 
@@ -181,6 +182,8 @@ markdown-blog/
 - **검색 팝업**: 헤더의 🔍 아이콘 클릭 시 모달로 검색 (`/api/search` 사용, 결과 클릭 시 바로 아티클로 이동)
 - **다크 모드**: 헤더의 슬라이드 토글로 전환, `localStorage`에 저장되어 재방문 시에도 유지되고 모든 페이지에 적용됨
 - **글쓰기 화면 실시간 미리보기**: 입력창과 렌더링 결과를 좌우로 동시에 표시 (탭 전환 없음)
+- **공용 이미지 첨부**: 파일 선택 또는 편집기에 브라우저 이미지를 붙여넣으면 `posts/images/`에 저장됩니다.
+  Obsidian의 `![[이미지.png]]`, `![[이미지.png|400]]`와 일반 Markdown의 `![](images/이미지.png)`를 모두 블로그에서 표시합니다.
 - **비밀번호 보호**: 글쓰기 · 수정 · 삭제 시 비밀번호 확인 모달이 뜸
   - 아직 비밀번호가 없으면 "비밀번호 설정" 화면, 있으면 "비밀번호 확인" 화면이 나옴
   - 확인 화면 하단의 "비밀번호 변경"으로 언제든 변경 가능
@@ -192,7 +195,7 @@ markdown-blog/
 
 ## 알려진 제한사항
 
-- 기존에 로컬에만 있던 글/이미지는 자동으로 옮겨지지 않습니다. 배포 전에 `posts/`, `public/images/`
+- 기존에 로컬에만 있던 글/이미지는 자동으로 옮겨지지 않습니다. 배포 전에 `posts/`
   안의 파일을 데이터 저장소(`markdown-blog-data`)에 직접 복사해 커밋해두면 이어서 쓸 수 있습니다.
 - 이미지가 git 저장소에 그대로 쌓이는 구조라, 이미지가 아주 많아지면 저장소 용량이 커집니다.
   나중에 필요하면 이미지만 Cloudinary 같은 외부 스토리지로 옮기는 방향으로 확장 가능합니다.
